@@ -1,0 +1,11 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "name": "Local",
+            "database": "${workspaceFolder:Cashier_API}/database.sqlite"
+        }
+    ],
+    "sqltools.useNodeRuntime": true
+}
