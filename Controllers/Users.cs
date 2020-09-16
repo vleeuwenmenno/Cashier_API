@@ -2,12 +2,45 @@ using System.Collections.Generic;
 using System.Linq;
 using Cashier_API.Constructors;
 using Microsoft.AspNetCore.Mvc;
+using SQLite;
 
 namespace Cashier_API.Controllers
 {
     [ApiController]
     public class UsersController : ControllerBase
     {
+        [HttpPost("users")] 
+        public ActionResult<IEnumerable<User>> NewUser([FromBody] User user, [FromHeader] string token)
+        {
+            // Check if user login
+            if (Logins.Verify(token, true))
+            {
+                HashSalt hs = LoginCrypto.GenerateSaltedHash(64, user.Hash);
+                    
+                user.Hash = hs.Hash;
+                user.Salt = hs.Salt;
+                
+                try 
+                {
+                    Program.db.Insert(user);
+
+                    user.Hash = "Hidden";
+                    user.Salt = "Hidden";
+
+                    return Ok(user);
+                }
+                catch (SQLiteException sqlex)
+                {
+                    if (sqlex.Message.StartsWith("UNIQUE constraint failed:"))
+                        return BadRequest("A user with this username already exists!");
+                    else
+                        return BadRequest("Unexpected error: " + sqlex);
+                }
+            }
+            else 
+                return Unauthorized();
+        }
+
         [HttpGet("users")] 
         public ActionResult<IEnumerable<User>> GetAll([FromHeader] string token)
         {
@@ -20,7 +53,7 @@ namespace Cashier_API.Controllers
                 return Unauthorized();
         }
 
-        [HttpDelete("users/delete/{id}")]
+        [HttpDelete("users/{id}")]
         public ActionResult DeleteUser(int id, [FromHeader] string token)
         {
             // Check if user login
@@ -33,6 +66,12 @@ namespace Cashier_API.Controllers
                 if (u == null)
                     return NotFound();
 
+                List<LoginSession> v = Program.db.Query<LoginSession>($"SELECT * FROM LoginSession WHERE id = '{token}';");
+                LoginSession uSession = v.Count > 0 ? v.First() : null;
+
+                if (u.id == uSession.userId)
+                    return BadRequest("Cannot delete yourself.");
+
                 Program.db.Delete(u);
                 return Ok();
             }
@@ -40,7 +79,7 @@ namespace Cashier_API.Controllers
                 return Unauthorized();
         }
 
-        [HttpPut("users/update/{id}")]
+        [HttpPut("users/{id}")]
         public ActionResult UpdateUser(int id, [FromBody] User raw, [FromHeader] string token)
         {
             // Check if user login
@@ -60,6 +99,18 @@ namespace Cashier_API.Controllers
                 if (raw.username != null)
                     u.username = raw.username;
 
+                if (raw.isAdmin != null)
+                    u.isAdmin = raw.isAdmin;
+
+                if (raw.Hash != null)
+                {
+                    // Update the password
+                    HashSalt hs = LoginCrypto.GenerateSaltedHash(64, raw.Hash);
+
+                    u.Hash = hs.Hash;
+                    u.Salt = hs.Salt;
+                }
+
                 Program.db.Update(u);
                 return Ok();
             }
@@ -73,7 +124,7 @@ namespace Cashier_API.Controllers
         public static User getUserById(int id)
         {
             // Get user from id
-            List<User> users = Program.db.Query<User>("SELECT * FROM User WHERE 1;");
+            List<User> users = Program.db.Query<User>($"SELECT * FROM User WHERE id='{id}';");
             return users.Count > 0 ? users.First() : null;
         }
     }

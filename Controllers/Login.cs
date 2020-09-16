@@ -90,7 +90,7 @@ namespace Cashier_API.Controllers
                 List<User> users = Program.db.Query<User>($"SELECT * FROM User WHERE id='{u.userId}';");
 
                 if (users.Count > 0)
-                    return users.First().isAdmin;
+                    return users.First().isAdmin == true;
                 
                 // User does not exist, but there is a session for a user that doesn't exist!? Deleting the session ...
                 Program.db.Delete(u);
