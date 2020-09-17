@@ -13,11 +13,11 @@
     <br />
     <a href="https://github.com/vleeuwenmenno/Cashier_API/releases">Download</a>
     ·
-    <a href="https://github.com/vleeuwenmenno/Cashier_API/issues">Report Bug</a>
+    <a href="https://trello.com/b/VrgIxGf4/cashier-api">Trello board</a>
     .
     <a href="https://vleeuwenmenno.github.io/Cashier_API/">API Documentation</a>
     ·
-    <a href="https://github.com/vleeuwenmenno/Cashier_API/issues">Request Feature</a>
+    <a href="https://github.com/vleeuwenmenno/Cashier_API/issues">Issues/Features</a>
   </p>
 </p>
 
