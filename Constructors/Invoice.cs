@@ -16,8 +16,6 @@ namespace Cashier_API.Constructors
         public string itemsBlob {get;set;}
         public string notice {get;set;}
 
-        public bool isProcessed {get;set;}
-
         public DateTime processedAt {get;set;}
         public PaymentMethod paymentMethod {get;set;}
 
