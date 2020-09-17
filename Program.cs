@@ -29,6 +29,7 @@ namespace Cashier_API
             db.CreateTable<Customer>();
             db.CreateTable<Contract>();
             db.CreateTable<Invoice>();
+            db.CreateTable<Cart>();
 
             // Check if there is atleast 1 user
             if (db.Query<User>("SELECT * FROM User WHERE 1;").Count == 0)

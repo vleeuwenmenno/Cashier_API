@@ -5,8 +5,8 @@ using SQLite;
 
 namespace Cashier_API.Constructors
 {
-    [Table("Invoice")]
-    public class Invoice
+    [Table("Cart")]
+    public class Cart
     {
         [AutoIncrement, PrimaryKey]
         public int id {get;set;}
@@ -16,7 +16,6 @@ namespace Cashier_API.Constructors
         public string itemsBlob {get;set;}
         public string notice {get;set;}
 
-        public DateTime processedAt {get;set;}
         public PaymentMethod paymentMethod {get;set;}
 
         /// <summary>
@@ -40,6 +39,12 @@ namespace Cashier_API.Constructors
                 fieldsBolb = JsonSerializer.Serialize(value);
             }
         }
+
+        /// <summary>
+        /// If this is true, the cart will not be destroyed upon executing the processing into an invoice. This can be useful if the same type of items are often used on an invoice.
+        /// </summary>
+        /// <value></value>
+        public bool isTemplate {get;set;}
 
         [Ignore]
         public List<ItemProperty> items 
