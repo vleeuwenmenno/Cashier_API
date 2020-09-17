@@ -26,7 +26,7 @@ namespace Cashier_API.Controllers
                     return Unauthorized();
 
                 // Check if the password matches the one stored as hashes and salts in the database
-                if (LoginCrypto.VerifyPassword(login[1], u.Hash, u.Salt))
+                if (Utilities.VerifyPassword(login[1], u.Hash, u.Salt))
                 {
                     // Password matched! Create a new session for the user to use.
                     LoginSession session = new LoginSession();

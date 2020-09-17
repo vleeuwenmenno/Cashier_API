@@ -37,7 +37,7 @@ namespace Cashier_API
                 const string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
                 string pass = new string(Enumerable.Repeat(chars, 8).Select(s => s[new Random().Next(s.Length)]).ToArray());
                 User u = new User();
-                HashSalt hs = LoginCrypto.GenerateSaltedHash(64, pass);
+                HashSalt hs = Utilities.GenerateSaltedHash(64, pass);
 
                 u.displayName = "Admin";
                 u.username = "admin";

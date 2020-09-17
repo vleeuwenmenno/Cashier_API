@@ -11,7 +11,7 @@ namespace Cashier_API
         public string Salt { get; set; }
     }
     
-    public class LoginCrypto
+    public class Utilities
     {
         public static HashSalt GenerateSaltedHash(int size, string password)
         {
@@ -33,10 +33,7 @@ namespace Cashier_API
             var rfc2898DeriveBytes = new Rfc2898DeriveBytes(enteredPassword, saltBytes, 10000);
             return Convert.ToBase64String(rfc2898DeriveBytes.GetBytes(256)) == storedHash;
         }
-    }
 
-    public class RegexUtilities
-    {
         public static bool IsValidEmail(string email)
         {
             if (string.IsNullOrWhiteSpace(email))
@@ -60,11 +57,11 @@ namespace Cashier_API
                     return match.Groups[1].Value + domainName;
                 }
             }
-            catch (RegexMatchTimeoutException e)
+            catch (RegexMatchTimeoutException)
             {
                 return false;
             }
-            catch (ArgumentException e)
+            catch (ArgumentException)
             {
                 return false;
             }

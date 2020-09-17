@@ -18,7 +18,7 @@ namespace Cashier_API.Controllers
             {
                 if (!string.IsNullOrEmpty(customer.initials) && !string.IsNullOrEmpty(customer.familyName) && !string.IsNullOrEmpty(customer.email))
                 {
-                    if (RegexUtilities.IsValidEmail(customer.email))
+                    if (Utilities.IsValidEmail(customer.email))
                     {
                         Program.db.Insert(customer);
                         return Ok(customer);

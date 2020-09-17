@@ -15,7 +15,7 @@ namespace Cashier_API.Controllers
             // Check if user login
             if (Logins.Verify(token, true))
             {
-                HashSalt hs = LoginCrypto.GenerateSaltedHash(64, user.Hash);
+                HashSalt hs = Utilities.GenerateSaltedHash(64, user.Hash);
                     
                 user.Hash = hs.Hash;
                 user.Salt = hs.Salt;
@@ -105,7 +105,7 @@ namespace Cashier_API.Controllers
                 if (raw.Hash != null)
                 {
                     // Update the password
-                    HashSalt hs = LoginCrypto.GenerateSaltedHash(64, raw.Hash);
+                    HashSalt hs = Utilities.GenerateSaltedHash(64, raw.Hash);
 
                     u.Hash = hs.Hash;
                     u.Salt = hs.Salt;
