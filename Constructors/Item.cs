@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Globalization;
 using SQLite;
 
 namespace Cashier_API.Constructors
@@ -30,7 +31,7 @@ namespace Cashier_API.Constructors
         /// This is a calculated value based on the price of the item, it indicates the price exluding any VAT.
         /// </summary>
         /// <value></value>
-        public decimal priceExVat 
+        public decimal priceExTax 
         {
             get
             {
@@ -65,5 +66,39 @@ namespace Cashier_API.Constructors
     {
         public int count {get;set;}
         public int multiplier {get;set;}
+
+        public decimal TotalPrice()
+        {
+            return (this.price * this.count) * this.multiplier;
+        }
+
+        public decimal TotalPriceExTax()
+        {
+            return (this.priceExTax * this.count) * this.multiplier;
+        }
+
+        public string PrettyPrice()
+        {
+            CultureInfo l = new CultureInfo(Program.options.locale);
+            return price.ToString("c", l);
+        }
+
+        public string PrettyPriceExTax()
+        {
+            CultureInfo l = new CultureInfo(Program.options.locale);
+            return priceExTax.ToString("c", l);
+        }
+
+        public string PrettyTotalPrice()
+        {
+            CultureInfo l = new CultureInfo(Program.options.locale);
+            return TotalPrice().ToString("c", l);
+        }
+
+        public string PrettyTotalPriceExTax()
+        {
+            CultureInfo l = new CultureInfo(Program.options.locale);
+            return TotalPriceExTax().ToString("c", l);
+        }
     }
 }

@@ -9,7 +9,7 @@ namespace Cashier_API.Constructors
         [PrimaryKey]
         public string id {get;set;}
         public int userId {get;set;}
-        public int activeCartId {get;set;}
+        public string activeCartId {get;set;}
         public DateTime expiry {get;set;}
         public bool passed2FA {get;set;}
     }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using Cashier_API.Constructors;
 using Microsoft.AspNetCore.Mvc;
 
@@ -52,7 +53,7 @@ namespace Cashier_API.Controllers
         }
         
         
-        [HttpGet("invoice/{customerId}")]
+        [HttpGet("invoice/{customerId}/customer")]
         public ActionResult<IEnumerable<Invoice>> GetInvoiceRange(int customerId, [FromHeader] string token)
         {
             if (Logins.Verify(token) != null)
@@ -61,6 +62,48 @@ namespace Cashier_API.Controllers
 
                 if (invoices.Count > 0)
                     return invoices;
+                else
+                    return NotFound();
+            }
+            else
+                return Unauthorized();
+        }
+
+        [HttpGet("invoice/{invoiceId}")]
+        public ActionResult<Invoice> GetInvoice(int invoiceId, [FromHeader] string token)
+        {
+            if (Logins.Verify(token) != null)
+            {
+                List<Invoice> invoices = Program.db.Query<Invoice>($"SELECT * FROM Invoice WHERE id=$1;", new object[] { invoiceId });
+
+                if (invoices.Count > 0)
+                    return invoices.Last();
+                else
+                    return NotFound();
+            }
+            else
+                return Unauthorized();
+        }
+
+        [HttpGet("invoice/{invoiceId}/totals")]
+        public ActionResult GetInvoiceTotals(int invoiceId, [FromHeader] string token)
+        {
+            if (Logins.Verify(token) != null)
+            {
+                List<Invoice> invoices = Program.db.Query<Invoice>($"SELECT * FROM Invoice WHERE id=$1;", new object[] { invoiceId });
+                if (invoices.Count > 0)
+                {
+                    Invoice invoice = invoices.Last();
+                    return Ok((new Dictionary<string, object>() 
+                    { 
+                        { "totalPrice", invoice.TotalPrice() }, 
+                        { "totalPriceExTax", invoice.TotalPriceExTax() },
+                        { "totalTax", invoice.TotalTax() },
+                        { "prettyTotalPrice", invoice.PrettyTotalPrice() },
+                        { "prettyTotalPriceExVat", invoice.PrettyTotalPriceExTax() },
+                        { "prettyTotalTax", invoice.PrettyTotalTax() },
+                    }));
+                }
                 else
                     return NotFound();
             }

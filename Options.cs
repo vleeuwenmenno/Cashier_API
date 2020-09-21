@@ -17,17 +17,36 @@ namespace Cashier_API
         #endregion
 
         #region Financial
+        /// <summary>
+        /// The amount of tax calculated on items
+        /// </summary>
+        /// <value></value>
         public decimal tax {get;set;}
+        /// <summary>
+        /// Tax string is what can be displayed to show tax. (NL: BTW, UK: VAT)
+        /// </summary>
+        /// <value></value>
         public string taxString {get;set;}
-        public char currencySymbol {get;set;}
-        public string currency {get;set;}
+        /// <summary>
+        /// The x amount of days it takes from processing date until the invoice is due to be paid. (Applies only to contracts with payment option other than direct debit)
+        /// </summary>
+        /// <value></value>
+        public int invoiceDueTime {get;set;}
         #endregion
 
         #region Company
         public string companyName {get;set;}
         public string companyLogo {get;set;}
         public string companyLogoSquare {get;set;}
+        public string locale {get;set;}
         #endregion
+
+        
+        #region Application
+        
+        #endregion
+
+        
 
         internal static string confLocation = Environment.CurrentDirectory +  "/config";
 

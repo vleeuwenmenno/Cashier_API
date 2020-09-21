@@ -17,6 +17,7 @@ namespace Cashier_API.Controllers
             LoginSession session = Logins.Verify(token);
             if (session != null)
             {
+                c.id = Guid.NewGuid().ToString();
                 Program.db.Insert(c);
                 session.activeCartId = c.id;
                 Program.db.Update(session);
@@ -26,12 +27,38 @@ namespace Cashier_API.Controllers
                 return Unauthorized();
         }
 
-        
 
-        [HttpPost("cart/{id}")]
-        public ActionResult ProcessCartToInvoice(int id, [FromHeader] string token)
+        [HttpGet("cart/{cartId}/totals")]
+        public ActionResult GetCartTotals(string cartId, [FromHeader] string token)
         {
             if (Logins.Verify(token) != null)
+            {
+                List<Cart> carts = Program.db.Query<Cart>($"SELECT * FROM Cart WHERE id=$1;", new object[] { cartId });
+                if (carts.Count > 0)
+                {
+                    Cart cart = carts.Last();
+                    return Ok((new Dictionary<string, object>() 
+                    { 
+                        { "totalPrice", cart.TotalPrice() }, 
+                        { "totalPriceExTax", cart.TotalPriceExTax() },
+                        { "totalTax", cart.TotalTax() },
+                        { "prettyTotalPrice", cart.PrettyTotalPrice() },
+                        { "prettyTotalPriceExVat", cart.PrettyTotalPriceExTax() },
+                        { "prettyTotalTax", cart.PrettyTotalTax() },
+                    }));
+                }
+                else
+                    return NotFound();
+            }
+            else
+                return Unauthorized();
+        }
+
+        [HttpPost("cart/{id}")]
+        public ActionResult ProcessCartToInvoice(string id, [FromHeader] string token)
+        {
+            LoginSession sess = Logins.Verify(token);
+            if (sess != null)
             {
                 List<Cart> carts = Program.db.Query<Cart>($"SELECT * FROM Cart WHERE id=$1;", new object[] { id });
                 Cart cart = carts.Count > 0 ? carts.Last() : null;
@@ -54,6 +81,10 @@ namespace Cashier_API.Controllers
                 if (cart.isTemplate == false)
                     Program.db.Delete(cart);
 
+                // Clear the active cart in the session as we processed it.
+                sess.activeCartId = "";
+
+                Program.db.Update(sess);
                 Program.db.Insert(invoice);
                 return Ok(invoice);
             }
@@ -62,7 +93,7 @@ namespace Cashier_API.Controllers
         }
 
         [HttpPut("cart/{id}")]
-        public ActionResult UpdateCart(int id, [FromBody] Cart update, [FromHeader] string token)
+        public ActionResult UpdateCart(string id, [FromBody] Cart update, [FromHeader] string token)
         {
             if (Logins.Verify(token) != null)
             {
@@ -90,7 +121,7 @@ namespace Cashier_API.Controllers
         }
 
         [HttpDelete("cart/{id}")]
-        public ActionResult DeleteCart(int id, [FromHeader] string token)
+        public ActionResult DeleteCart(string id, [FromHeader] string token)
         {
             if (Logins.Verify(token) != null)
             {
@@ -109,7 +140,7 @@ namespace Cashier_API.Controllers
         }
 
         [HttpGet("cart/{id}")]
-        public ActionResult GetCart(int id, [FromHeader] string token)
+        public ActionResult GetCart(string id, [FromHeader] string token)
         {
             if (Logins.Verify(token) != null)
             {
@@ -143,7 +174,7 @@ namespace Cashier_API.Controllers
         }
 
         [HttpPost("cart/{id}/items")]
-        public ActionResult<IEnumerable<Cart>> UpdateCartItems(int id, [FromBody] string[] items, [FromHeader] string token)
+        public ActionResult<IEnumerable<Cart>> UpdateCartItems(string id, [FromBody] string[] items, [FromHeader] string token)
         {
             if (Logins.Verify(token) != null)
             {
@@ -188,7 +219,7 @@ namespace Cashier_API.Controllers
         }
 
         [HttpDelete("cart/{id}/items")]
-        public ActionResult<IEnumerable<Cart>> DeleteItemsCart(int id, [FromBody] string[] items, [FromHeader] string token)
+        public ActionResult<IEnumerable<Cart>> DeleteItemsCart(string id, [FromBody] string[] items, [FromHeader] string token)
         {
             if (Logins.Verify(token) != null)
             {
@@ -221,7 +252,7 @@ namespace Cashier_API.Controllers
         }
 
         [HttpPut("cart/{id}/items/count")]
-        public ActionResult<IEnumerable<Cart>> UpdateCartItemsCount(int id, [FromBody] Dictionary<string, int> items, [FromHeader] string token)
+        public ActionResult<IEnumerable<Cart>> UpdateCartItemsCount(string id, [FromBody] Dictionary<string, int> items, [FromHeader] string token)
         {
             if (Logins.Verify(token) != null)
             {
@@ -261,7 +292,7 @@ namespace Cashier_API.Controllers
         }
 
         [HttpPut("cart/{id}/items/multiplier")]
-        public ActionResult<IEnumerable<Cart>> UpdateCartItemsMultipliers(int id, [FromBody] Dictionary<string, int> items, [FromHeader] string token)
+        public ActionResult<IEnumerable<Cart>> UpdateCartItemsMultipliers(string id, [FromBody] Dictionary<string, int> items, [FromHeader] string token)
         {
             if (Logins.Verify(token) != null)
             {

@@ -1,0 +1,95 @@
+@page
+@using Cashier_API
+@using RazorPagesIntro.Pages
+@using Cashier_API.Constructors
+@model InvoicePage
+
+@{
+    List<Invoice> invoices = Program.db.Query<Invoice>("SELECT * FROM Invoice WHERE id=$1;", new object[] { (string)ViewContext.HttpContext.Request.Query["iid"] } );
+    Invoice invoice = invoices.Last();
+}
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Factuur</title>
+        
+    </head>
+    <body>
+        <header class="clearfix">
+            <div>
+                <div id="logo">
+                    <img src="@(Program.options.companyLogo)">
+                </div>
+                <h1>@(Program.options.companyName) &bull;  &bull;  &bull; </h1>
+                <h2> &bull;  &bull; </h2>
+            </div>
+            <div class="briefpapier" style="display: none;"></div>
+            <div id="invoice">
+                <div><span>#@(invoice.id)</span> FACTUURNUMMER</div>
+                <div><span>@(invoice.processedAt)</span> DATUM</div>
+            </div>
+            <div id="project">
+                <div><span>KLANT</span> </div>
+                <div><span>ADRES</span> </div>
+                <div><span>EMAIL</span> <a href="mailto:"> </a></div>
+            </div>
+        </header>
+        <main>
+            <table>
+                <thead>
+                    <tr>
+                        <th class="desc">OMSCRHIJVING</th>
+                        <th></th>
+                        <th>STUKPRIJS</th>
+                        <th>KEER</th>
+                        <th>AANTAL</th>
+                        <th>EXCL. </th>
+                        <th>INCL. </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (ItemProperty item in invoice.items)
+                    {
+                        <tr>
+                            <td class="service">@(item.description)</td>
+                            <td></td>
+                            <td class="unit">@(item.PrettyPrice())</td>
+                            <td class="qty">@(item.multiplier)</td>
+                            <td class="qty">@(item.count)</td>
+                            <td class="total">@(item.PrettyTotalPriceExTax())</td>
+                            <td class="total">@(item.PrettyTotalPrice())</td>
+                        </tr>
+                    }
+                    
+                    <tr>
+                        <td colspan="5"></td>
+                        <td class="total">EXCL. </td>
+                        <td class="total">@(invoice.PrettyTotalPriceExTax())</td>
+                    </tr>
+                    <tr>
+                        <td colspan="5"></td>
+                        <td>@(Program.options.taxString)</td>
+                        <td class="total">@(invoice.PrettyTotalTax())</td>
+                    </tr>
+                    <tr>
+                        <td colspan="5" class="grand total"></td>
+                        <td class="grand total">EINDTOTAAL</td>
+                        <td class="grand total">@(invoice.PrettyTotalPrice())</td>
+                    </tr>
+                </tbody>
+            </table>
+            @if (!string.IsNullOrEmpty(invoice.notice))
+            {
+            <div id="notices">
+                <div>OPMERKING:</div>
+                <div class="notice">&emsp;@(invoice.notice)</div>
+                <div class="notice"><span style="color: red;">LET OP! Deze factuur wordt automatisch geïncasseerd, dit gebeurt ----------. U hoeft deze nota niet handmatig te betalen.</span></div>
+            </div>
+            }
+        </main>
+        <footer>
+            <?=$_CFG['disclaimer']?>
+        </footer>
+    </body>
+</html>

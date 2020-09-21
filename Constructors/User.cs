@@ -18,6 +18,5 @@ namespace Cashier_API.Constructors
         public bool twoFactorConfirmed {get;set;}
         
         public bool? isAdmin {get;set;}
-
     }
 }
