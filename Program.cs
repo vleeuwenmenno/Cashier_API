@@ -16,10 +16,12 @@ namespace Cashier_API
     public class Program
     {
         public static SQLiteConnection db;
+        public static Options options = new Options();
         
         public static void Main(string[] args)
         {
             // Check if we have a database
+            options.LoadOptions();
             db = new SQLiteConnection(Environment.CurrentDirectory + "/database.sqlite");
             
             db.CreateTable<User>();
