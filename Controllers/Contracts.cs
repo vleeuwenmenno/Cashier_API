@@ -227,7 +227,7 @@ namespace Cashier_API.Controllers
         }
 
         [HttpPut("contract/{id}/items/count")]
-        public ActionResult<IEnumerable<Contract>> UpdateContractItems(int id, [FromBody] Dictionary<string, int> items, [FromHeader] string token)
+        public ActionResult<IEnumerable<Contract>> UpdateContractItemsCount(int id, [FromBody] Dictionary<string, int> items, [FromHeader] string token)
         {
             if (Logins.Verify(token) != null)
             {
