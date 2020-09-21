@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Cashier_API.Constructors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using TwoFactorAuthNet;
+using TwoFactorAuthNetSkiaSharpQrProvider;
 
 namespace Cashier_API.Controllers
 {
@@ -62,42 +64,188 @@ namespace Cashier_API.Controllers
             Program.db.Delete(u);            
             return Ok();
         }
+
+        
+        [HttpGet("login/2fa")] 
+        public IActionResult setup2FA([FromHeader] string token)
+        {
+           // Check if the user managed to login with user and password but don't check 2fa here
+            if (Logins.Verify(token, false, false) != null)
+            { 
+                // Check if the user has 2fa enabled
+                List<LoginSession> v = Program.db.Query<LoginSession>($"SELECT * FROM LoginSession WHERE id = '{token}';");
+                LoginSession u = v.Count > 0 ? v.First() : null;
+
+                // Get the user that owns this session
+                List<User> users = Program.db.Query<User>($"SELECT * FROM User WHERE id='{u.userId}';");
+                User user = users.Last();
+
+                if (user.twoFactorConfirmed)
+                    return BadRequest("2FA is already enabled for this account.");
+                else
+                {
+                    TwoFactorAuth tfa = new TwoFactorAuth("Cashier API", qrcodeprovider: new SkiaSharpQrCodeProvider()); //TODO: Change org to company name from global settings (WIP)
+                    string secret = tfa.CreateSecret(160);
+                    
+                    user.twoFactorSecret = secret;
+                    user.twoFactorConfirmed = false;
+
+                    Program.db.Update(user);
+                    
+                    return Ok(tfa.GetQrCodeImageAsDataUri("Cashier API", secret));
+                }
+            }
+            else
+                return Unauthorized();
+        }
+
+        [HttpDelete("login/2fa")] 
+        public IActionResult removeTFA([FromBody] string tfaCode, [FromHeader] string token)
+        {
+            // Check if the user managed to login with user and password but don't check 2fa here
+            if (Logins.Verify(token, false, false) != null)
+            {
+                // Check if the user has 2fa enabled
+                List<LoginSession> v = Program.db.Query<LoginSession>($"SELECT * FROM LoginSession WHERE id = '{token}';");
+                LoginSession u = v.Count > 0 ? v.First() : null;
+
+                // Get the user that owns this session
+                List<User> users = Program.db.Query<User>($"SELECT * FROM User WHERE id='{u.userId}';");
+                User user = users.Last();
+
+                if (!u.passed2FA)
+                    return BadRequest("2FA must be validated before we can disable 2FA on this account.");
+
+                if (users.Count > 0)
+                {
+                    if (!string.IsNullOrEmpty(user.twoFactorSecret))
+                    {
+                        var tfa = new TwoFactorAuth("Cashier API"); //TODO: Change org to company name from global settings (WIP)
+                        
+                        // Verify if 2FA code is valid
+                        if (tfa.VerifyCode(user.twoFactorSecret, tfaCode))
+                        {
+                            // If 2FA was never confirmed let's make it confirmed as we validated a code.
+                            if (user.twoFactorConfirmed)
+                            {
+                                user.twoFactorConfirmed = false;
+                                user.twoFactorSecret = "";
+                                Program.db.Update(user);
+                            }
+                            else
+                                return BadRequest("2FA was not enabled on this account, therefore we cannot disable it either.");
+                            
+                            return Ok(u);
+                        }
+                        else
+                            return Unauthorized("Incorrect 2FA code");
+                    }
+                    else
+                        return BadRequest("2FA is not enabled for this account.");
+                }
+                else
+                    return BadRequest("No user found with this login token.");
+            }
+            else
+                return Unauthorized();
+        }
+
+        [HttpPost("login/2fa")] 
+        public IActionResult confirmTFA([FromBody] string tfaCode, [FromHeader] string token)
+        {
+            // Check if the user managed to login with user and password but don't check 2fa here
+            if (Logins.Verify(token, false, false) != null)
+            {
+                // Check if the user has 2fa enabled
+                List<LoginSession> v = Program.db.Query<LoginSession>($"SELECT * FROM LoginSession WHERE id = '{token}';");
+                LoginSession u = v.Count > 0 ? v.First() : null;
+
+                // Get the user that owns this session
+                List<User> users = Program.db.Query<User>($"SELECT * FROM User WHERE id='{u.userId}';");
+                User user = users.Last();
+
+                if (u.passed2FA)
+                    return BadRequest("2FA is already validated for this session.");
+
+                if (users.Count > 0)
+                {
+                    if (!string.IsNullOrEmpty(user.twoFactorSecret))
+                    {
+                        var tfa = new TwoFactorAuth("Cashier API"); //TODO: Change org to company name from global settings (WIP)
+                        
+                        // Verify if 2FA code is valid
+                        if (tfa.VerifyCode(user.twoFactorSecret, tfaCode))
+                        {
+                            // Code seems legit, update db and return session info.
+                            u.passed2FA = true;
+                            Program.db.Update(u);
+
+                            // If 2FA was never confirmed let's make it confirmed as we validated a code.
+                            if (!user.twoFactorConfirmed)
+                            {
+                                user.twoFactorConfirmed = true;
+                                Program.db.Update(user);
+                            }
+                            
+                            return Ok(u);
+                        }
+                        else
+                            return Unauthorized("Incorrect 2FA code");
+                    }
+                    else
+                        return BadRequest("2FA is not enabled for this account.");
+                }
+                else
+                    return BadRequest("No user found with this login token.");
+            }
+            else
+                return Unauthorized();
+        }
     }
 
     public class Logins
     {
-        public static bool Verify(string token, bool mustBeAdmin = false)
+        public static LoginSession Verify(string token, bool mustBeAdmin = false, bool checkTFA = true)
         {
             List<LoginSession> v = Program.db.Query<LoginSession>($"SELECT * FROM LoginSession WHERE id = '{token}';");
             LoginSession u = v.Count > 0 ? v.First() : null;
 
             //Check if we found a session matching our token.
             if (u == null)
-                return false;
+                return null;
             
             //Check if the session is expired
             if (u.expiry < DateTime.Now)
             {
                 //Session is not valid! We will delete it from the database.
                 Program.db.Delete(u);
-                return false;
+                return null;
+            }
+            
+            // Get the user that owns this session
+            List<User> users = Program.db.Query<User>($"SELECT * FROM User WHERE id='{u.userId}';");
+            User user = users.Last();
+
+            if (users.Count == 0)
+            {
+                // User does not exist, but there is a session for a user that doesn't exist!? Deleting the session ...
+                Program.db.Delete(u);
+                return null;
+            }
+
+            // Are we required to check for two factor auth?
+            if (checkTFA && !string.IsNullOrEmpty(user.twoFactorSecret) && user.twoFactorConfirmed)
+            {
+                // Secret for 2FA is set, but user did not pass 2FA for current session.
+                if (!u.passed2FA)
+                    return null;
             }
             
             // If we must check if its admin we run the following code
             if (mustBeAdmin)
-            {
-                // Get the user that owns this session
-                List<User> users = Program.db.Query<User>($"SELECT * FROM User WHERE id='{u.userId}';");
-
-                if (users.Count > 0)
-                    return users.First().isAdmin == true;
-                
-                // User does not exist, but there is a session for a user that doesn't exist!? Deleting the session ...
-                Program.db.Delete(u);
-                return false;
-            }       
+                return users.First().isAdmin == true ? u : null;
             else
-                return true;     
+                return u;
         }
     }
 }

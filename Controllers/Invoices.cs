@@ -12,7 +12,7 @@ namespace Cashier_API.Controllers
         [HttpDelete("invoice/{id}")]
         public IActionResult DeleteInvoice(int id,[FromHeader] string token)
         {
-            if (Logins.Verify(token, true))
+            if (Logins.Verify(token, true) != null)
             {
                 List<Invoice> invoices = Program.db.Query<Invoice>($"SELECT * FROM Invoice WHERE id='{id}';");
 
@@ -38,7 +38,7 @@ namespace Cashier_API.Controllers
         [HttpGet("invoice/{count}/{offset}")]
         public ActionResult<IEnumerable<Invoice>> GetInvoiceRange(int count, int offset, [FromHeader] string token)
         {
-            if (Logins.Verify(token))
+            if (Logins.Verify(token) != null)
             {
                 List<Invoice> invoices = Program.db.Query<Invoice>($"SELECT * FROM Invoice LIMIT {count} OFFSET {offset};");
 
@@ -55,7 +55,7 @@ namespace Cashier_API.Controllers
         [HttpGet("invoice/{customerId}")]
         public ActionResult<IEnumerable<Invoice>> GetInvoiceRange(int customerId, [FromHeader] string token)
         {
-            if (Logins.Verify(token))
+            if (Logins.Verify(token) != null)
             {
                 List<Invoice> invoices = Program.db.Query<Invoice>($"SELECT * FROM Invoice WHERE customerId={customerId};");
 

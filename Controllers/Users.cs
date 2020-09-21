@@ -13,7 +13,7 @@ namespace Cashier_API.Controllers
         public ActionResult<IEnumerable<User>> NewUser([FromBody] User user, [FromHeader] string token)
         {
             // Check if user login
-            if (Logins.Verify(token, true))
+            if (Logins.Verify(token, true) != null)
             {
                 HashSalt hs = Utilities.GenerateSaltedHash(64, user.Hash);
                     
@@ -45,7 +45,7 @@ namespace Cashier_API.Controllers
         public ActionResult<IEnumerable<User>> GetAll([FromHeader] string token)
         {
             // Check if user login
-            if (Logins.Verify(token, true))
+            if (Logins.Verify(token, true) != null)
             {
                 return Program.db.Query<User>("SELECT id, displayName, username, isAdmin FROM User WHERE 1;");
             }
@@ -57,7 +57,7 @@ namespace Cashier_API.Controllers
         public ActionResult DeleteUser(int id, [FromHeader] string token)
         {
             // Check if user login
-            if (Logins.Verify(token, true))
+            if (Logins.Verify(token, true) != null)
             {
                 // Get the user to delete
                 User u = Users.getUserById(id);
@@ -83,7 +83,7 @@ namespace Cashier_API.Controllers
         public ActionResult UpdateUser(int id, [FromBody] User raw, [FromHeader] string token)
         {
             // Check if user login
-            if (Logins.Verify(token, true))
+            if (Logins.Verify(token, true) != null)
             {
                 // Get the user to delete
                 User u = Users.getUserById(id);

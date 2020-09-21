@@ -14,7 +14,7 @@ namespace Cashier_API.Controllers
         [HttpPost("item")]
         public IActionResult NewItem([FromBody] Item item, [FromHeader] string token)
         {
-            if (Logins.Verify(token,  true))
+            if (Logins.Verify(token,  true) != null)
             {
                 if (!string.IsNullOrEmpty(item.description) && item.margin != 0 && item.price != 0)
                 {
@@ -32,7 +32,7 @@ namespace Cashier_API.Controllers
         [HttpGet("item/search")]
         public ActionResult<IEnumerable<Item>> SearchItem([FromBody] string query, [FromHeader] string token)
         {
-            if (Logins.Verify(token))
+            if (Logins.Verify(token) != null)
             {
                 // Prevent searching everything, else this would causes a major performance hit.
                 if (string.IsNullOrEmpty(query))
@@ -52,7 +52,7 @@ namespace Cashier_API.Controllers
         [HttpGet("item/{id}")]
         public ActionResult<IEnumerable<Item>> GetItem(string id, [FromHeader] string token)
         {
-            if (Logins.Verify(token))
+            if (Logins.Verify(token) != null)
             {
                 List<Item> items = Items.getItem(id);
 
@@ -68,7 +68,7 @@ namespace Cashier_API.Controllers
         [HttpDelete("item/{id}")]
         public ActionResult DeleteItem(string id, [FromHeader] string token)
         {
-            if (Logins.Verify(token, true))
+            if (Logins.Verify(token, true) != null)
             {
                 List<Item> items = Program.db.Query<Item>($"SELECT * FROM Item WHERE id = '{id}';");
 
@@ -95,7 +95,7 @@ namespace Cashier_API.Controllers
         [HttpPut("item/{id}")]
         public ActionResult UpdateItem(string id, [FromBody] Item update, [FromHeader] string token)
         {
-            if (Logins.Verify(token, true))
+            if (Logins.Verify(token, true) != null)
             {
                 List<Item> items = Program.db.Query<Item>($"SELECT * FROM Item WHERE id = '{id}';");
 
@@ -134,7 +134,7 @@ namespace Cashier_API.Controllers
         [HttpPut("item/{id}/stock/{stock}")]
         public ActionResult UpdateItemStock(string id, int stock, [FromHeader] string token)
         {
-            if (Logins.Verify(token, true))
+            if (Logins.Verify(token, true) != null)
             {
                 List<ItemStock> items = Program.db.Query<ItemStock>($"SELECT * FROM ItemStock WHERE id = '{id}';");
 
@@ -157,7 +157,7 @@ namespace Cashier_API.Controllers
         [HttpGet("item/{count}/{offset}")]
         public ActionResult<IEnumerable<Item>> GetItemRange(int count, int offset, [FromHeader] string token)
         {
-            if (Logins.Verify(token))
+            if (Logins.Verify(token) != null)
             {
                 List<Item> items = Program.db.Query<Item>($"SELECT * FROM Item LIMIT {count} OFFSET {offset};");
 

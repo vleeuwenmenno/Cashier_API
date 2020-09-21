@@ -15,7 +15,7 @@ namespace Cashier_API.Controllers
         [HttpPost("contract")]
         public IActionResult NewContract([FromBody] Contract contract, [FromHeader] string token)
         {
-            if (Logins.Verify(token))
+            if (Logins.Verify(token) != null)
             {
                 if (contract.runDay >= 1  && contract.runDay <= 27 && contract.customerId > 0)
                 {
@@ -42,7 +42,7 @@ namespace Cashier_API.Controllers
         [HttpGet("contract/{id}")]
         public ActionResult<IEnumerable<Contract>> GetContract(string id, [FromHeader] string token)
         {
-            if (Logins.Verify(token))
+            if (Logins.Verify(token) != null)
             {
                 List<Contract> contracts = Program.db.Query<Contract>($"SELECT * FROM Contract WHERE id='{id}';");
 
@@ -58,7 +58,7 @@ namespace Cashier_API.Controllers
         [HttpGet("contract/search")]
         public ActionResult<IEnumerable<Contract>> SearchContract([FromBody] string query, [FromHeader] string token)
         {
-            if (Logins.Verify(token))
+            if (Logins.Verify(token) != null)
             {
                 // Prevent searching everything, else this would causes a major performance hit.
                 if (string.IsNullOrEmpty(query))
@@ -78,7 +78,7 @@ namespace Cashier_API.Controllers
         [HttpDelete("contract/{id}")]
         public ActionResult ArchiveContract(string id, [FromHeader] string token)
         {
-            if (Logins.Verify(token))
+            if (Logins.Verify(token) != null)
             {
                 List<Contract> contracts = Program.db.Query<Contract>($"SELECT * FROM Contract WHERE id='{id}';");
                 
@@ -109,7 +109,7 @@ namespace Cashier_API.Controllers
         [HttpPut("contract/{id}")]
         public ActionResult<IEnumerable<Contract>> UpdateContract(string id, [FromBody] Contract update, [FromHeader] string token)
         {
-            if (Logins.Verify(token))
+            if (Logins.Verify(token) != null)
             {
                 List<Contract> contract = Program.db.Query<Contract>($"SELECT * FROM Contract WHERE id = '{id}';");
 
@@ -151,7 +151,7 @@ namespace Cashier_API.Controllers
         [HttpPost("contract/{id}/items")]
         public ActionResult<IEnumerable<Contract>> UpdateContractItems(int id, [FromBody] string[] items, [FromHeader] string token)
         {
-            if (Logins.Verify(token))
+            if (Logins.Verify(token) != null)
             {
                 List<Contract> contracts = Program.db.Query<Contract>($"SELECT * FROM Contract WHERE id='{id}';");
 
@@ -196,7 +196,7 @@ namespace Cashier_API.Controllers
         [HttpDelete("contract/{id}/items")]
         public ActionResult<IEnumerable<Contract>> DeleteItemsContract(int id, [FromBody] string[] items, [FromHeader] string token)
         {
-            if (Logins.Verify(token))
+            if (Logins.Verify(token) != null)
             {
                 List<Contract> contracts = Program.db.Query<Contract>($"SELECT * FROM Contract WHERE id='{id}';");
 
@@ -229,7 +229,7 @@ namespace Cashier_API.Controllers
         [HttpPut("contract/{id}/items/count")]
         public ActionResult<IEnumerable<Contract>> UpdateContractItems(int id, [FromBody] Dictionary<string, int> items, [FromHeader] string token)
         {
-            if (Logins.Verify(token))
+            if (Logins.Verify(token) != null)
             {
                 List<Contract> contracts = Program.db.Query<Contract>($"SELECT * FROM Contract WHERE id='{id}';");
 
@@ -269,7 +269,7 @@ namespace Cashier_API.Controllers
         [HttpPut("contract/{id}/items/multiplier")]
         public ActionResult<IEnumerable<Contract>> UpdateContractItemsMultipliers(int id, [FromBody] Dictionary<string, int> items, [FromHeader] string token)
         {
-            if (Logins.Verify(token))
+            if (Logins.Verify(token) != null)
             {
                 List<Contract> contracts = Program.db.Query<Contract>($"SELECT * FROM Contract WHERE id='{id}';");
 
@@ -309,7 +309,7 @@ namespace Cashier_API.Controllers
         [HttpGet("contract/{offset}/{count}")]
         public ActionResult<IEnumerable<Contract>> GetContract(int offset, int count, [FromHeader] string token)
         {
-            if (Logins.Verify(token))
+            if (Logins.Verify(token) != null)
             {
                 List<Contract> contracts = Program.db.Query<Contract>($"SELECT * FROM Contract LIMIT {count} OFFSET {offset};");
 

@@ -14,7 +14,7 @@ namespace Cashier_API.Controllers
         [HttpPost("customer")]
         public IActionResult NewCustomer([FromBody] Customer customer, [FromHeader] string token)
         {
-            if (Logins.Verify(token))
+            if (Logins.Verify(token) != null)
             {
                 if (!string.IsNullOrEmpty(customer.initials) && !string.IsNullOrEmpty(customer.familyName) && !string.IsNullOrEmpty(customer.email))
                 {
@@ -36,7 +36,7 @@ namespace Cashier_API.Controllers
         [HttpGet("customer/search")]
         public ActionResult<IEnumerable<Customer>> SearchCustomer([FromBody] string query, [FromHeader] string token)
         {
-            if (Logins.Verify(token))
+            if (Logins.Verify(token) != null)
             {
                 // Prevent searching everything, else this would causes a major performance hit.
                 if (string.IsNullOrEmpty(query))
@@ -56,7 +56,7 @@ namespace Cashier_API.Controllers
         [HttpGet("customer/{id}")]
         public ActionResult<IEnumerable<Customer>> GetItem(string id, [FromHeader] string token)
         {
-            if (Logins.Verify(token))
+            if (Logins.Verify(token) != null)
             {
                 List<Customer> customers = Program.db.Query<Customer>($"SELECT * FROM Customer WHERE id='{id}';");
 
@@ -72,7 +72,7 @@ namespace Cashier_API.Controllers
         [HttpGet("customer/{id}/contracts")]
         public ActionResult<IEnumerable<Contract>> GetAllCustomerContracts(string id, [FromHeader] string token)
         {
-            if (Logins.Verify(token))
+            if (Logins.Verify(token) != null)
             {
                 List<Contract> contracts = Program.db.Query<Contract>($"SELECT * FROM Contract WHERE customerId='{id}';");
 
@@ -88,7 +88,7 @@ namespace Cashier_API.Controllers
         [HttpDelete("customer/{id}")]
         public ActionResult DeleteCustomer(string id, [FromHeader] string token)
         {
-            if (Logins.Verify(token))
+            if (Logins.Verify(token) != null)
             {
                 List<Customer> customers = Program.db.Query<Customer>($"SELECT * FROM Customer WHERE id='{id}';");
 
@@ -112,7 +112,7 @@ namespace Cashier_API.Controllers
         [HttpPut("customer/{id}")]
         public ActionResult<IEnumerable<Customer>> UpdateCustomer(string id, [FromBody] Customer update, [FromHeader] string token)
         {
-            if (Logins.Verify(token))
+            if (Logins.Verify(token) != null)
             {
                 List<Customer> customer = Program.db.Query<Customer>($"SELECT * FROM Customer WHERE id = '{id}';");
 
@@ -158,7 +158,7 @@ namespace Cashier_API.Controllers
         [HttpGet("customer/{offset}/{count}")]
         public ActionResult<IEnumerable<Customer>> GetCustomerRange(int offset, int count, [FromHeader] string token)
         {
-            if (Logins.Verify(token))
+            if (Logins.Verify(token) != null)
             {
                 List<Customer> customers = Program.db.Query<Customer>($"SELECT * FROM Customer LIMIT {count} OFFSET {offset};");
 
