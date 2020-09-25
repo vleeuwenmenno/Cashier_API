@@ -271,9 +271,16 @@ namespace Cashier_API.Controllers
                             //if so just add/remove the amount
                             cartItems.FirstOrDefault(c => c.id == Convert.ToInt32(item.Key)).count += item.Value;
 
-                            //if we have 0 or less added at the moment we will remove it from the cart as we can't sell negatives in carts
+                            //if we are admin, only then we can accept negative returns.
+                            LoginSession sess = Logins.Verify(token, true);
+                            
                             if (cartItems.FirstOrDefault(c => c.id == Convert.ToInt32(item.Key)).count <= 0)
-                                cartItems.Remove(cartItems.FirstOrDefault(c => c.id == Convert.ToInt32(item.Key)));
+                            {
+                                if (sess != null)
+                                { }
+                                else
+                                    return Unauthorized("Only admins are allowed to accept returns.");
+                            }
                         }
                         else
                             return NotFound($"Cart does not contain item with id {item.Key}");
