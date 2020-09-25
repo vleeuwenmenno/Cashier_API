@@ -51,7 +51,6 @@ namespace Cashier_API.Constructors
         NotSet = 0,
         Cash = 1,
         Card = 2,
-        DirectDebit = 3,
         BankTransfer = 3
     }
 }
