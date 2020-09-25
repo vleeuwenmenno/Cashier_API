@@ -238,18 +238,20 @@ namespace Cashier_API.Controllers
                 Program.db.Delete(u);
                 return null;
             }
-
-            // Are we required to check for two factor auth?
-            if (checkTFA && !string.IsNullOrEmpty(user.twoFactorSecret) && user.twoFactorConfirmed)
-            {
-                // Secret for 2FA is set, but user did not pass 2FA for current session.
-                if (!u.passed2FA)
-                    return null;
-            }
             
             // If we must check if its admin we run the following code
             if (mustBeAdmin)
+            {
+                // Are we required to check for two factor auth?
+                if (checkTFA && !string.IsNullOrEmpty(user.twoFactorSecret) && user.twoFactorConfirmed)
+                {
+                    // Secret for 2FA is set, but user did not pass 2FA for current session.
+                    if (!u.passed2FA)
+                        return null;
+                }
+                
                 return users.First().isAdmin == true ? u : null;
+            }
             else
                 return u;
         }
