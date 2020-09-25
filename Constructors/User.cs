@@ -14,6 +14,7 @@ namespace Cashier_API.Constructors
         public string displayName {get;set;}
         public string Hash { get; set; }
         public string Salt { get; set; }
+        public string pinCode { get; set; }
         public string twoFactorSecret {get;set;}
         public bool twoFactorConfirmed {get;set;}
         

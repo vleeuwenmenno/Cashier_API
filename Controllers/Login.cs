@@ -16,8 +16,11 @@ namespace Cashier_API.Controllers
         [HttpPost("login")] 
         public IActionResult login([FromBody] string[] login)
         {
+            if (login.Length != 3)
+                return BadRequest("Missing login information, expected username, password and pincode.");
+
             // Get user with given username
-            List<User> users = Program.db.Query<User>($"SELECT * FROM User WHERE username = '{login[0]}';");
+            List<User> users = Program.db.Query<User>($"SELECT * FROM User WHERE username=$1;", new object[] { login[0] });
 
             // Check if we found any user with the query
             if (users.Count > 0)
@@ -30,6 +33,9 @@ namespace Cashier_API.Controllers
                 // Check if the password matches the one stored as hashes and salts in the database
                 if (Utilities.VerifyPassword(login[1], u.Hash, u.Salt))
                 {
+                    if (u.pinCode != login[2])
+                        return Unauthorized("Incorrect pincode!");
+
                     // Password matched! Create a new session for the user to use.
                     LoginSession session = new LoginSession();
 
@@ -71,7 +77,7 @@ namespace Cashier_API.Controllers
         {
            // Check if the user managed to login with user and password but don't check 2fa here
             if (Logins.Verify(token, false, false) != null)
-            { 
+            {
                 // Check if the user has 2fa enabled
                 List<LoginSession> v = Program.db.Query<LoginSession>($"SELECT * FROM LoginSession WHERE id = '{token}';");
                 LoginSession u = v.Count > 0 ? v.First() : null;
