@@ -36,14 +36,16 @@ namespace Cashier_API
             // Check if there is atleast 1 user
             if (db.Query<User>("SELECT * FROM User WHERE 1;").Count == 0)
             {
+                Random rnd = new Random();
                 // Seems like there are no users, let's make a default admin/admin
                 const string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-                string pass = new string(Enumerable.Repeat(chars, 8).Select(s => s[new Random().Next(s.Length)]).ToArray());
+                string pass = new string(Enumerable.Repeat(chars, 8).Select(s => s[rnd.Next(s.Length)]).ToArray());
                 User u = new User();
                 HashSalt hs = Utilities.GenerateSaltedHash(64, pass);
 
                 u.displayName = "Admin";
                 u.username = "admin";
+                u.pinCode = rnd.Next(0, 9999).ToString();
                 u.Hash = hs.Hash;
                 u.Salt = hs.Salt;
                 u.isAdmin = true;
@@ -57,6 +59,10 @@ namespace Cashier_API
                 Console.Write("\tPassword: ");
                 Console.ForegroundColor = ConsoleColor.DarkRed;
                 Console.WriteLine(pass);
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Write("\tPincode: ");
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+                Console.WriteLine(u.pinCode);
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("\n\n\t!!! It's recommended to change this ASAP !!!\n\n");
                 Console.ForegroundColor = ConsoleColor.White;

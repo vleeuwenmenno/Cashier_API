@@ -102,6 +102,9 @@ namespace Cashier_API.Controllers
                 if (raw.isAdmin != null)
                     u.isAdmin = raw.isAdmin;
 
+                if (raw.pinCode != null)
+                    u.pinCode = raw.pinCode;
+
                 if (raw.Hash != null)
                 {
                     // Update the password
