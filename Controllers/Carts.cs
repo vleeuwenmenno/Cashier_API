@@ -74,7 +74,7 @@ namespace Cashier_API.Controllers
                 invoice.notice = cart.notice;
                 invoice.paymentMethod = cart.paymentMethod;
                 invoice.processedAt = DateTime.Now;
-                invoice.userId = cart.userId;
+                invoice.userId = sess.userId;
                 invoice.customerId = cart.customerId;
 
                 // If cart was not a template it means we should delete it once we processed it.

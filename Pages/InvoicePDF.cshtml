@@ -2,7 +2,7 @@
 @using Cashier_API
 @using RazorPagesIntro.Pages
 @using Cashier_API.Constructors
-@model InvoicePage
+@model InvoicePDFPage
 
 @{
     string id = (string)ViewContext.HttpContext.Request.Query["iid"];
@@ -18,7 +18,6 @@
     <head>
         <meta charset="utf-8">
         <title>Factuur</title>
-        
     </head>
     <body>
         <header class="clearfix">

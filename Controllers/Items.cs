@@ -115,6 +115,9 @@ namespace Cashier_API.Controllers
                     if (!string.IsNullOrEmpty(update.description))
                         i.description = update.description;
 
+                    if (!string.IsNullOrEmpty(update.image))
+                        i.image = update.image;
+
                     if (!string.IsNullOrEmpty(update.category))
                         i.category = update.category;
 

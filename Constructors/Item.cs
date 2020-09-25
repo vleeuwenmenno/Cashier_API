@@ -11,6 +11,7 @@ namespace Cashier_API.Constructors
         public int id {get;set;}
 
         public string barcode {get;set;}
+        public string image {get;set;}
         public string description {get;set;}
         public string supplier {get;set;}
         public string category {get;set;}
